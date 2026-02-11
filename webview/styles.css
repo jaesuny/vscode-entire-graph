@@ -1,0 +1,308 @@
+/* ── Reset & Base ── */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+  color: var(--vscode-foreground);
+  background: var(--vscode-editor-background);
+  overflow: hidden;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* ── Active Session Banner ── */
+.active-banner {
+  background: var(--vscode-statusBar-debuggingBackground, #388a34);
+  color: var(--vscode-statusBar-debuggingForeground, #fff);
+  padding: 6px 12px;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.active-session-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.active-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4caf50;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* ── Main Layout ── */
+.main-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.left-pane {
+  flex: 1;
+  overflow-y: auto;
+  min-width: 0;
+}
+
+.detail-pane {
+  width: 320px;
+  flex-shrink: 0;
+  border-left: 1px solid var(--vscode-panel-border);
+  overflow-y: auto;
+  padding: 12px;
+}
+
+/* ── Graph + List Container ── */
+.graph-list-container {
+  display: flex;
+}
+
+.graph-column {
+  width: 80px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.graph-column svg {
+  display: block;
+}
+
+.list-column {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Commit Table ── */
+.commit-table {
+  display: flex;
+  flex-direction: column;
+}
+
+.commit-row {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  height: 28px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--vscode-list-inactiveSelectionBackground, transparent);
+  gap: 8px;
+}
+
+.commit-row:hover {
+  background: var(--vscode-list-hoverBackground);
+}
+
+.commit-row.selected {
+  background: var(--vscode-list-activeSelectionBackground);
+  color: var(--vscode-list-activeSelectionForeground);
+}
+
+.commit-info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.commit-hash {
+  font-family: var(--vscode-editor-font-family, monospace);
+  font-size: 12px;
+  color: var(--vscode-textLink-foreground);
+  flex-shrink: 0;
+}
+
+.commit-message {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.commit-refs {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.ref-badge {
+  background: var(--vscode-badge-background);
+  color: var(--vscode-badge-foreground);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.commit-date {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--vscode-descriptionForeground);
+  width: 60px;
+  text-align: right;
+}
+
+.commit-entire {
+  flex-shrink: 0;
+  width: 100px;
+  text-align: center;
+}
+
+.entire-badge {
+  display: inline-block;
+  background: var(--vscode-editorInfo-foreground, #3794ff);
+  color: #fff;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* ── Empty & Notice States ── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--vscode-descriptionForeground);
+  gap: 8px;
+}
+
+.empty-icon {
+  font-size: 48px;
+  opacity: 0.5;
+}
+
+.empty-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.empty-desc {
+  font-size: 13px;
+  max-width: 400px;
+  text-align: center;
+}
+
+.notice-bar {
+  background: var(--vscode-editorWidget-background);
+  border-bottom: 1px solid var(--vscode-panel-border);
+  padding: 4px 12px;
+  font-size: 12px;
+  color: var(--vscode-descriptionForeground);
+  flex-shrink: 0;
+}
+
+/* ── Detail Panel ── */
+.detail-empty {
+  color: var(--vscode-descriptionForeground);
+  text-align: center;
+  padding-top: 40px;
+  font-style: italic;
+}
+
+.detail-section {
+  margin-bottom: 16px;
+}
+
+.detail-section h3 {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--vscode-descriptionForeground);
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--vscode-panel-border);
+  padding-bottom: 4px;
+}
+
+.detail-field {
+  display: flex;
+  margin-bottom: 4px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.detail-label {
+  color: var(--vscode-descriptionForeground);
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+.detail-value {
+  word-break: break-all;
+}
+
+.detail-value.mono {
+  font-family: var(--vscode-editor-font-family, monospace);
+}
+
+/* ── Attribution Bar ── */
+.attribution-bar {
+  display: flex;
+  height: 12px;
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 6px 0;
+}
+
+.attribution-agent {
+  background: var(--vscode-editorInfo-foreground, #3794ff);
+}
+
+.attribution-human {
+  background: var(--vscode-charts-green, #89d185);
+}
+
+.attribution-label {
+  font-size: 11px;
+  color: var(--vscode-descriptionForeground);
+  margin-top: 2px;
+}
+
+/* ── Tasks ── */
+.task-item {
+  padding: 4px 0 4px 12px;
+  font-size: 12px;
+  border-left: 2px solid var(--vscode-panel-border);
+  margin-bottom: 4px;
+}
+
+.task-toggle {
+  cursor: pointer;
+  user-select: none;
+}
+
+.task-toggle:hover {
+  color: var(--vscode-textLink-foreground);
+}
+
+/* ── Summary ── */
+.summary-text {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--vscode-foreground);
+  background: var(--vscode-textBlockQuote-background, rgba(127,127,127,0.1));
+  padding: 8px;
+  border-radius: 4px;
+  border-left: 3px solid var(--vscode-textBlockQuote-border, #007acc);
+}
