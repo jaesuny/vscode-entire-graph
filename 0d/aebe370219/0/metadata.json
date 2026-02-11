@@ -1,0 +1,38 @@
+{
+  "cli_version": "0.4.2",
+  "checkpoint_id": "0daebe370219",
+  "session_id": "9012a34d-7796-4a50-babf-4cbb6cc77dfa",
+  "strategy": "auto-commit",
+  "created_at": "2026-02-11T16:19:41.298406Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    ".gitignore",
+    ".vscode/launch.json",
+    ".vscode/tasks.json",
+    ".vscodeignore",
+    "CLAUDE.md",
+    "package-lock.json",
+    "src/dataProvider.ts",
+    "src/entirePanel.ts",
+    "src/extension.ts",
+    "src/gitReader.ts",
+    "src/types.ts",
+    "webview/commitList.ts",
+    "webview/detailPanel.ts",
+    "webview/graph.ts",
+    "webview/main.ts",
+    "webview/styles.css"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "9ab0769c-5363-483f-b6b8-619dc64c778a",
+  "checkpoint_transcript_start": 59,
+  "transcript_lines_at_start": 59,
+  "token_usage": {
+    "input_tokens": 47,
+    "cache_creation_tokens": 63847,
+    "cache_read_tokens": 2576955,
+    "output_tokens": 2785,
+    "api_call_count": 45
+  }
+}

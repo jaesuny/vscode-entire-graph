@@ -1,0 +1,41 @@
+{
+  "cli_version": "0.4.2",
+  "checkpoint_id": "0daebe370219",
+  "strategy": "auto-commit",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    ".gitignore",
+    ".vscode/launch.json",
+    ".vscode/tasks.json",
+    ".vscodeignore",
+    "CLAUDE.md",
+    "package-lock.json",
+    "src/dataProvider.ts",
+    "src/entirePanel.ts",
+    "src/extension.ts",
+    "src/gitReader.ts",
+    "src/types.ts",
+    "webview/commitList.ts",
+    "webview/detailPanel.ts",
+    "webview/graph.ts",
+    "webview/main.ts",
+    "webview/styles.css"
+  ],
+  "sessions": [
+    {
+      "metadata": "/0d/aebe370219/0/metadata.json",
+      "transcript": "/0d/aebe370219/0/full.jsonl",
+      "context": "",
+      "content_hash": "/0d/aebe370219/0/content_hash.txt",
+      "prompt": ""
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 47,
+    "cache_creation_tokens": 63847,
+    "cache_read_tokens": 2576955,
+    "output_tokens": 2785,
+    "api_call_count": 45
+  }
+}
