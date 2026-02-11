@@ -1,0 +1,6 @@
+이미 있네요. 준비 완료입니다. **F5** 누르면 됩니다.
+
+**순서:**
+1. F5 → Extension Development Host 뜸 (이 폴더가 열린 상태)
+2. `Cmd+Shift+P` → "Show Entire Graph" 실행
+3. 패널에 커밋 히스토리 + Entire 뱃지가 보여야 합니다

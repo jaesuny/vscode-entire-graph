@@ -1,0 +1,24 @@
+{
+  "cli_version": "0.4.2",
+  "checkpoint_id": "fe93767a4500",
+  "session_id": "9012a34d-7796-4a50-babf-4cbb6cc77dfa",
+  "strategy": "auto-commit",
+  "created_at": "2026-02-11T16:23:03.162072Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    ".vscode/launch.json",
+    ".vscode/tasks.json"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "d35491a2-e509-4107-a863-f343116541fe",
+  "checkpoint_transcript_start": 258,
+  "transcript_lines_at_start": 258,
+  "token_usage": {
+    "input_tokens": 8,
+    "cache_creation_tokens": 66549,
+    "cache_read_tokens": 422537,
+    "output_tokens": 851,
+    "api_call_count": 6
+  }
+}
