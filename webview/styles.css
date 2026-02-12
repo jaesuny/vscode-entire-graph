@@ -59,114 +59,43 @@ body {
   flex: 1;
   overflow-y: auto;
   min-width: 0;
+  padding: 8px 0;
 }
 
 .detail-pane {
-  width: 320px;
+  width: 340px;
   flex-shrink: 0;
   border-left: 1px solid var(--vscode-panel-border);
   overflow-y: auto;
   padding: 12px;
 }
 
-/* ── Graph + List Container ── */
-.graph-list-container {
-  display: flex;
-}
-
-.graph-column {
-  width: 80px;
-  flex-shrink: 0;
-  overflow: hidden;
-}
-
-.graph-column svg {
-  display: block;
-}
-
-.list-column {
-  flex: 1;
-  min-width: 0;
-}
-
-/* ── Commit Table ── */
-.commit-table {
+/* ── Session List ── */
+.session-list {
   display: flex;
   flex-direction: column;
-}
-
-.commit-row {
-  display: flex;
-  align-items: center;
-  padding: 4px 8px;
-  height: 28px;
-  cursor: pointer;
-  border-bottom: 1px solid var(--vscode-list-inactiveSelectionBackground, transparent);
-  gap: 8px;
-}
-
-.commit-row:hover {
-  background: var(--vscode-list-hoverBackground);
-}
-
-.commit-row.selected {
-  background: var(--vscode-list-activeSelectionBackground);
-  color: var(--vscode-list-activeSelectionForeground);
-}
-
-.commit-info {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  overflow: hidden;
-  min-width: 0;
-}
-
-.commit-hash {
-  font-family: var(--vscode-editor-font-family, monospace);
-  font-size: 12px;
-  color: var(--vscode-textLink-foreground);
-  flex-shrink: 0;
-}
-
-.commit-message {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  min-width: 0;
-}
-
-.commit-refs {
-  display: flex;
   gap: 4px;
-  flex-shrink: 0;
 }
 
-.ref-badge {
-  background: var(--vscode-badge-background);
-  color: var(--vscode-badge-foreground);
-  padding: 1px 6px;
-  border-radius: 3px;
-  font-size: 11px;
-  white-space: nowrap;
+.session-group {
+  margin-bottom: 2px;
 }
 
-.commit-date {
-  flex-shrink: 0;
+.session-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
   font-size: 12px;
   color: var(--vscode-descriptionForeground);
-  width: 60px;
-  text-align: right;
+  border-bottom: 1px solid var(--vscode-panel-border);
+  position: sticky;
+  top: 0;
+  background: var(--vscode-editor-background);
+  z-index: 1;
 }
 
-.commit-entire {
-  flex-shrink: 0;
-  width: 100px;
-  text-align: center;
-}
-
-.entire-badge {
+.agent-badge {
   display: inline-block;
   background: var(--vscode-editorInfo-foreground, #3794ff);
   color: #fff;
@@ -174,6 +103,85 @@ body {
   border-radius: 10px;
   font-size: 11px;
   font-weight: 500;
+  flex-shrink: 0;
+}
+
+.session-id {
+  font-family: var(--vscode-editor-font-family, monospace);
+  font-size: 11px;
+  color: var(--vscode-textLink-foreground);
+  flex-shrink: 0;
+}
+
+.session-date {
+  flex-shrink: 0;
+}
+
+.checkpoint-count {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* ── Checkpoint Rows ── */
+.checkpoint-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.checkpoint-row {
+  display: flex;
+  align-items: flex-start;
+  padding: 6px 12px 6px 16px;
+  cursor: pointer;
+  gap: 8px;
+  min-height: 36px;
+}
+
+.checkpoint-row:hover {
+  background: var(--vscode-list-hoverBackground);
+}
+
+.checkpoint-row.selected {
+  background: var(--vscode-list-activeSelectionBackground);
+  color: var(--vscode-list-activeSelectionForeground);
+}
+
+.checkpoint-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--vscode-editorInfo-foreground, #3794ff);
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+.checkpoint-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.checkpoint-message {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.checkpoint-meta {
+  font-size: 11px;
+  color: var(--vscode-descriptionForeground);
+}
+
+.checkpoint-hash {
+  font-family: var(--vscode-editor-font-family, monospace);
+  font-size: 11px;
+  color: var(--vscode-textLink-foreground);
+  flex-shrink: 0;
+  margin-top: 3px;
 }
 
 /* ── Empty & Notice States ── */
@@ -185,6 +193,7 @@ body {
   height: 100%;
   color: var(--vscode-descriptionForeground);
   gap: 8px;
+  padding: 40px;
 }
 
 .empty-icon {
@@ -201,15 +210,6 @@ body {
   font-size: 13px;
   max-width: 400px;
   text-align: center;
-}
-
-.notice-bar {
-  background: var(--vscode-editorWidget-background);
-  border-bottom: 1px solid var(--vscode-panel-border);
-  padding: 4px 12px;
-  font-size: 12px;
-  color: var(--vscode-descriptionForeground);
-  flex-shrink: 0;
 }
 
 /* ── Detail Panel ── */

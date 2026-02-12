@@ -1,8 +1,7 @@
 import "./styles.css";
-import type { HostMessage, WebviewMessage, GitCommit, ActiveSession } from "../src/types";
-import { renderCommitList } from "./commitList";
+import type { HostMessage, WebviewMessage, SessionGroup, ActiveSession } from "../src/types";
+import { renderSessionList } from "./commitList";
 import { renderDetailPanel, clearDetailPanel } from "./detailPanel";
-import { renderGraph } from "./graph";
 
 interface VsCodeApi {
   postMessage(msg: WebviewMessage): void;
@@ -14,9 +13,9 @@ declare function acquireVsCodeApi(): VsCodeApi;
 
 const vscode = acquireVsCodeApi();
 
-let commits: GitCommit[] = [];
+let sessions: SessionGroup[] = [];
 let activeSessions: ActiveSession[] = [];
-let selectedHash: string | null = null;
+let selectedCheckpointId: string | null = null;
 
 function render() {
   const root = document.getElementById("root")!;
@@ -27,55 +26,18 @@ function render() {
     root.appendChild(renderActiveBanner(activeSessions));
   }
 
-  // Empty state
-  if (commits.length === 0) {
-    const empty = document.createElement("div");
-    empty.className = "empty-state";
-    empty.innerHTML = `
-      <div class="empty-icon">&#x1f4ca;</div>
-      <div class="empty-title">No commits found</div>
-      <div class="empty-desc">This repository has no commit history yet, or git is not available.</div>
-    `;
-    root.appendChild(empty);
-    return;
-  }
-
-  // Check if any commit has Entire data
-  const hasEntireData = commits.some((c) => c.entireCheckpointId);
-  if (!hasEntireData) {
-    const notice = document.createElement("div");
-    notice.className = "notice-bar";
-    notice.textContent = "No Entire checkpoints found. Commits are shown without AI session data.";
-    root.appendChild(notice);
-  }
-
-  // Main content: graph + list + detail
+  // Main content: session list + detail
   const main = document.createElement("div");
   main.className = "main-layout";
 
   const leftPane = document.createElement("div");
   leftPane.className = "left-pane";
-
-  // Graph + commit list container
-  const graphListContainer = document.createElement("div");
-  graphListContainer.className = "graph-list-container";
-
-  const graphCol = document.createElement("div");
-  graphCol.className = "graph-column";
-  renderGraph(graphCol, commits);
-
-  const listCol = document.createElement("div");
-  listCol.className = "list-column";
-  renderCommitList(listCol, commits, selectedHash, onCommitClick);
-
-  graphListContainer.appendChild(graphCol);
-  graphListContainer.appendChild(listCol);
-  leftPane.appendChild(graphListContainer);
+  renderSessionList(leftPane, sessions, selectedCheckpointId, onCheckpointClick);
 
   const detailPane = document.createElement("div");
   detailPane.className = "detail-pane";
   detailPane.id = "detail-pane";
-  if (!selectedHash) {
+  if (!selectedCheckpointId) {
     clearDetailPanel(detailPane);
   }
 
@@ -84,10 +46,10 @@ function render() {
   root.appendChild(main);
 }
 
-function onCommitClick(hash: string) {
-  selectedHash = hash;
+function onCheckpointClick(checkpointId: string) {
+  selectedCheckpointId = checkpointId;
   render();
-  vscode.postMessage({ type: "requestDetail", hash });
+  vscode.postMessage({ type: "requestDetail", checkpointId });
 }
 
 function renderActiveBanner(sessions: ActiveSession[]): HTMLElement {
@@ -102,7 +64,7 @@ function renderActiveBanner(sessions: ActiveSession[]): HTMLElement {
         : session.first_prompt;
     const line = document.createElement("div");
     line.className = "active-session-line";
-    line.innerHTML = `<span class="active-dot"></span> Active: "${escapeHtml(prompt)}" · ${escapeHtml(session.agent_type)} · ${elapsed}`;
+    line.innerHTML = `<span class="active-dot"></span> Active: "${escapeHtml(prompt)}" &middot; ${escapeHtml(session.agent_type)} &middot; ${elapsed}`;
     banner.appendChild(line);
   }
   return banner;
@@ -130,11 +92,11 @@ window.addEventListener("message", (event) => {
   const msg = event.data as HostMessage;
   switch (msg.type) {
     case "initialData":
-      commits = msg.commits;
+      sessions = msg.sessions;
       activeSessions = msg.activeSessions;
       render();
       break;
-    case "commitDetail": {
+    case "checkpointDetail": {
       const pane = document.getElementById("detail-pane");
       if (pane) {
         renderDetailPanel(pane, msg.detail);

@@ -70,11 +70,11 @@ export class EntirePanel {
 
   private async loadInitialData() {
     try {
-      const [commits, activeSessions] = await Promise.all([
-        this.dataProvider.getCommits(),
+      const [sessions, activeSessions] = await Promise.all([
+        this.dataProvider.getSessions(),
         this.dataProvider.getActiveSessions(),
       ]);
-      this.postMessage({ type: "initialData", commits, activeSessions });
+      this.postMessage({ type: "initialData", sessions, activeSessions });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       this.postMessage({ type: "error", message });
@@ -85,8 +85,9 @@ export class EntirePanel {
     switch (msg.type) {
       case "requestDetail": {
         try {
-          const detail = await this.dataProvider.getCommitDetail(msg.hash);
-          this.postMessage({ type: "commitDetail", detail });
+          const detail =
+            await this.dataProvider.getCommitDetailByCheckpoint(msg.checkpointId);
+          this.postMessage({ type: "checkpointDetail", detail });
         } catch (err) {
           const message = err instanceof Error ? err.message : String(err);
           this.postMessage({ type: "error", message });

@@ -7,6 +7,7 @@ import type {
   CommitDetail,
   EntireCheckpoint,
   RootCheckpointMetadata,
+  SessionGroup,
   SessionMetadata,
   TaskCheckpoint,
 } from "./types";
@@ -60,21 +61,89 @@ export class DataProvider {
     });
   }
 
-  /** Load full detail for a commit, including Entire checkpoint if present. */
-  async getCommitDetail(hash: string): Promise<CommitDetail> {
+  /**
+   * Group Entire-annotated commits by session ID.
+   *
+   * Code commits have Entire-Checkpoint but NOT Entire-Session.
+   * The session_id lives in the orphan branch metadata.
+   * We enrich each code commit with its session_id from the metadata.
+   */
+  async getSessions(maxCount = 200): Promise<SessionGroup[]> {
+    const commits = await this.getCommits(maxCount);
+    const entireCommits = commits.filter((c) => c.entireCheckpointId);
+
+    // Enrich commits with session_id from orphan branch metadata
+    for (const commit of entireCommits) {
+      if (commit.entireSessionId) continue; // already has session info
+      try {
+        const cpId = commit.entireCheckpointId!;
+        const shard = cpId.slice(0, 2);
+        const rest = cpId.slice(2);
+        const rootRaw = await gitShow(
+          this.cwd,
+          ORPHAN_REF,
+          `${shard}/${rest}/metadata.json`
+        );
+        const root: RootCheckpointMetadata = JSON.parse(rootRaw);
+
+        // Read first session metadata to get session_id and agent
+        if (root.sessions.length > 0) {
+          const metaPath = root.sessions[0].metadata.replace(/^\//, "");
+          const sessRaw = await gitShow(this.cwd, ORPHAN_REF, metaPath);
+          const sessMeta: SessionMetadata = JSON.parse(sessRaw);
+          commit.entireSessionId = sessMeta.session_id;
+          commit.entireAgent = commit.entireAgent || sessMeta.agent;
+        }
+      } catch {
+        // Skip if metadata unavailable
+      }
+    }
+
+    // Group by session_id
+    const groupMap = new Map<string, GitCommit[]>();
+    for (const commit of entireCommits) {
+      const sid = commit.entireSessionId ?? `unknown-${commit.hash}`;
+      const group = groupMap.get(sid) ?? [];
+      group.push(commit);
+      groupMap.set(sid, group);
+    }
+
+    const sessions: SessionGroup[] = [];
+    for (const [sessionId, checkpoints] of groupMap) {
+      const agent = checkpoints[0].entireAgent ?? "AI";
+      const dates = checkpoints.map((c) => new Date(c.date).getTime());
+      sessions.push({
+        sessionId,
+        agent,
+        checkpoints,
+        startedAt: new Date(Math.min(...dates)).toISOString(),
+        lastActivityAt: new Date(Math.max(...dates)).toISOString(),
+      });
+    }
+
+    // Sort sessions by most recent activity first
+    sessions.sort(
+      (a, b) =>
+        new Date(b.lastActivityAt).getTime() -
+        new Date(a.lastActivityAt).getTime()
+    );
+
+    return sessions;
+  }
+
+  /** Load full detail for a checkpoint. */
+  async getCommitDetailByCheckpoint(checkpointId: string): Promise<CommitDetail> {
     const commits = await this.getCommits();
-    const commit = commits.find((c) => c.hash === hash || c.abbreviatedHash === hash);
+    const commit = commits.find((c) => c.entireCheckpointId === checkpointId);
     if (!commit) {
-      throw new Error(`Commit ${hash} not found`);
+      throw new Error(`Checkpoint ${checkpointId} not found`);
     }
 
     let checkpoint: EntireCheckpoint | undefined;
-    if (commit.entireCheckpointId) {
-      try {
-        checkpoint = await this.getCheckpointDetail(commit.entireCheckpointId);
-      } catch {
-        // Checkpoint data may not be available
-      }
+    try {
+      checkpoint = await this.getCheckpointDetail(checkpointId);
+    } catch {
+      // Checkpoint data may not be available
     }
 
     return { commit, checkpoint };

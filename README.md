@@ -1,14 +1,13 @@
 # Entire Graph for VS Code
 
-Git commit graph with [Entire](https://entire.io) AI agent session data overlay.
+Visualize [Entire](https://entire.io) AI agent sessions inside VS Code.
 
-See which commits were made by AI agents, inspect token usage, attribution ratios, and session summaries — all inside VS Code.
+Browse sessions, inspect checkpoints, see token usage and attribution — all without leaving your editor.
 
 ## Features
 
-- **Git commit graph** — SVG branch/merge visualization with lane assignment
-- **Entire checkpoint overlay** — commits with AI agent data get a badge showing the agent type
-- **Detail panel** — click any commit to see git info + Entire metadata (tokens, attribution bar, summary)
+- **Session-centric view** — commits grouped by AI agent session, not git topology
+- **Checkpoint details** — click any checkpoint to see token usage, attribution bar, summary, and sub-agents
 - **Active session banner** — shows currently running AI agent sessions with elapsed time
 - **Auto-refresh** — watches for new checkpoints and active session changes
 

@@ -98,6 +98,19 @@ export interface ActiveSession {
   checkpoint_count: number;
 }
 
+// ── Session Group (Entire-centric view) ──
+
+/** A group of commits belonging to the same Entire session */
+export interface SessionGroup {
+  sessionId: string;
+  agent: string;
+  checkpoints: GitCommit[];
+  /** Earliest checkpoint date */
+  startedAt: string;
+  /** Latest checkpoint date */
+  lastActivityAt: string;
+}
+
 // ── Commit Detail (combined git + entire) ──
 
 export interface CommitDetail {
@@ -108,11 +121,11 @@ export interface CommitDetail {
 // ── Message Protocol (webview ↔ host) ──
 
 export type WebviewMessage =
-  | { type: "requestDetail"; hash: string }
+  | { type: "requestDetail"; checkpointId: string }
   | { type: "refresh" };
 
 export type HostMessage =
-  | { type: "initialData"; commits: GitCommit[]; activeSessions: ActiveSession[] }
-  | { type: "commitDetail"; detail: CommitDetail }
+  | { type: "initialData"; sessions: SessionGroup[]; activeSessions: ActiveSession[] }
+  | { type: "checkpointDetail"; detail: CommitDetail }
   | { type: "activeSessions"; sessions: ActiveSession[] }
   | { type: "error"; message: string };

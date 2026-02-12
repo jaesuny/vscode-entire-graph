@@ -1,88 +1,160 @@
-import type { GitCommit } from "../src/types";
+import type { SessionGroup, GitCommit } from "../src/types";
 
-export function renderCommitList(
+export function renderSessionList(
   container: HTMLElement,
-  commits: GitCommit[],
-  selectedHash: string | null,
-  onCommitClick: (hash: string) => void
+  sessions: SessionGroup[],
+  selectedCheckpointId: string | null,
+  onCheckpointClick: (checkpointId: string) => void
 ): void {
-  const table = document.createElement("div");
-  table.className = "commit-table";
+  const list = document.createElement("div");
+  list.className = "session-list";
 
-  for (const commit of commits) {
-    const row = document.createElement("div");
-    row.className = "commit-row";
-    if (commit.hash === selectedHash) {
-      row.classList.add("selected");
-    }
-    row.addEventListener("click", () => onCommitClick(commit.hash));
-
-    // Commit info column
-    const info = document.createElement("div");
-    info.className = "commit-info";
-
-    const hashSpan = document.createElement("span");
-    hashSpan.className = "commit-hash";
-    hashSpan.textContent = commit.abbreviatedHash;
-
-    const msgSpan = document.createElement("span");
-    msgSpan.className = "commit-message";
-    msgSpan.textContent = commit.subject;
-
-    // Ref badges
-    const refsContainer = document.createElement("span");
-    refsContainer.className = "commit-refs";
-    for (const ref of commit.refs) {
-      // Skip Entire orphan branch refs
-      if (ref.includes("entire/checkpoints")) continue;
-      const badge = document.createElement("span");
-      badge.className = "ref-badge";
-      badge.textContent = ref.replace("HEAD -> ", "");
-      refsContainer.appendChild(badge);
-    }
-
-    info.appendChild(hashSpan);
-    if (refsContainer.children.length > 0) {
-      info.appendChild(refsContainer);
-    }
-    info.appendChild(msgSpan);
-
-    // Date column
-    const dateSpan = document.createElement("span");
-    dateSpan.className = "commit-date";
-    dateSpan.textContent = formatRelativeDate(commit.date);
-
-    // Entire badge column
-    const entireCol = document.createElement("div");
-    entireCol.className = "commit-entire";
-    if (commit.entireCheckpointId) {
-      const badge = document.createElement("span");
-      badge.className = "entire-badge";
-      badge.title = `Checkpoint: ${commit.entireCheckpointId}`;
-      badge.textContent = commit.entireAgent || "AI";
-      entireCol.appendChild(badge);
-    }
-
-    row.appendChild(info);
-    row.appendChild(dateSpan);
-    row.appendChild(entireCol);
-    table.appendChild(row);
+  if (sessions.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "empty-state";
+    empty.innerHTML = `
+      <div class="empty-icon">&#x1f916;</div>
+      <div class="empty-title">No Entire sessions found</div>
+      <div class="empty-desc">AI agent sessions will appear here once Entire captures checkpoints in this repository.</div>
+    `;
+    container.appendChild(empty);
+    return;
   }
 
-  container.appendChild(table);
+  for (const session of sessions) {
+    list.appendChild(
+      renderSessionGroup(session, selectedCheckpointId, onCheckpointClick)
+    );
+  }
+
+  container.appendChild(list);
 }
 
-function formatRelativeDate(isoDate: string): string {
-  const date = new Date(isoDate);
-  const now = Date.now();
-  const diffMs = now - date.getTime();
-  const diffMin = Math.floor(diffMs / 60000);
-  const diffHr = Math.floor(diffMs / 3600000);
-  const diffDay = Math.floor(diffMs / 86400000);
+function renderSessionGroup(
+  session: SessionGroup,
+  selectedCheckpointId: string | null,
+  onCheckpointClick: (checkpointId: string) => void
+): HTMLElement {
+  const group = document.createElement("div");
+  group.className = "session-group";
 
-  if (diffMin < 1) return "just now";
-  if (diffMin < 60) return `${diffMin}m ago`;
-  if (diffHr < 24) return `${diffHr}h ago`;
-  if (diffDay < 30) return `${diffDay}d ago`;
-  return date.toLocaleDateString();
+  // Session header
+  const header = document.createElement("div");
+  header.className = "session-header";
+
+  const agentBadge = document.createElement("span");
+  agentBadge.className = "agent-badge";
+  agentBadge.textContent = session.agent;
+
+  const sessionId = document.createElement("span");
+  sessionId.className = "session-id";
+  sessionId.textContent = session.sessionId.slice(0, 7);
+
+  const dateRange = document.createElement("span");
+  dateRange.className = "session-date";
+  dateRange.textContent = formatDateRange(session.startedAt, session.lastActivityAt);
+
+  const count = document.createElement("span");
+  count.className = "checkpoint-count";
+  count.textContent = `${session.checkpoints.length} checkpoint${session.checkpoints.length !== 1 ? "s" : ""}`;
+
+  header.appendChild(agentBadge);
+  header.appendChild(sessionId);
+  header.appendChild(dateRange);
+  header.appendChild(count);
+
+  group.appendChild(header);
+
+  // Checkpoint list
+  const checkpoints = document.createElement("div");
+  checkpoints.className = "checkpoint-list";
+
+  for (const commit of session.checkpoints) {
+    const row = renderCheckpointRow(commit, selectedCheckpointId, onCheckpointClick);
+    checkpoints.appendChild(row);
+  }
+
+  group.appendChild(checkpoints);
+  return group;
+}
+
+function renderCheckpointRow(
+  commit: GitCommit,
+  selectedCheckpointId: string | null,
+  onCheckpointClick: (checkpointId: string) => void
+): HTMLElement {
+  const row = document.createElement("div");
+  row.className = "checkpoint-row";
+  if (commit.entireCheckpointId === selectedCheckpointId) {
+    row.classList.add("selected");
+  }
+
+  // Timeline dot
+  const dot = document.createElement("span");
+  dot.className = "checkpoint-dot";
+
+  // Info
+  const info = document.createElement("div");
+  info.className = "checkpoint-info";
+
+  const message = document.createElement("span");
+  message.className = "checkpoint-message";
+  message.textContent = commit.subject;
+
+  const meta = document.createElement("span");
+  meta.className = "checkpoint-meta";
+
+  const parts: string[] = [formatTime(commit.date)];
+  if (commit.entireCheckpointId) {
+    parts.push(commit.entireCheckpointId.slice(0, 8));
+  }
+  if (commit.entireAttribution) {
+    parts.push(commit.entireAttribution);
+  }
+  meta.textContent = parts.join(" \u00b7 ");
+
+  info.appendChild(message);
+  info.appendChild(meta);
+
+  // Commit hash link
+  const hashSpan = document.createElement("span");
+  hashSpan.className = "checkpoint-hash";
+  hashSpan.textContent = commit.abbreviatedHash;
+  hashSpan.title = commit.hash;
+
+  row.appendChild(dot);
+  row.appendChild(info);
+  row.appendChild(hashSpan);
+
+  if (commit.entireCheckpointId) {
+    const cpId = commit.entireCheckpointId;
+    row.addEventListener("click", () => onCheckpointClick(cpId));
+  }
+
+  return row;
+}
+
+function formatTime(isoDate: string): string {
+  const d = new Date(isoDate);
+  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
+function formatDateRange(start: string, end: string): string {
+  const s = new Date(start);
+  const e = new Date(end);
+
+  const sameDay =
+    s.getFullYear() === e.getFullYear() &&
+    s.getMonth() === e.getMonth() &&
+    s.getDate() === e.getDate();
+
+  if (sameDay) {
+    return s.toLocaleDateString([], {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  }
+
+  return `${s.toLocaleDateString([], { month: "short", day: "numeric" })} – ${e.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })}`;
 }

@@ -39,7 +39,14 @@ export function gitLog(cwd: string, maxCount = 200): Promise<string> {
   ].join("%x00");
 
   return execGit(
-    ["log", `--format=${format}%x01`, "--all", `--max-count=${maxCount}`],
+    [
+      "log",
+      `--format=${format}%x01`,
+      "--all",
+      "--not",
+      "--glob=refs/heads/entire/*",
+      `--max-count=${maxCount}`,
+    ],
     cwd
   );
 }
