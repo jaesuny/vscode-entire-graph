@@ -2,6 +2,23 @@ import { execFile } from "child_process";
 
 const MAX_BUFFER = 10 * 1024 * 1024; // 10 MB
 
+/** Run an arbitrary command and return stdout. */
+export function execCmd(
+  cmd: string,
+  args: string[],
+  cwd: string
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    execFile(cmd, args, { cwd, maxBuffer: MAX_BUFFER }, (err, stdout) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(stdout);
+      }
+    });
+  });
+}
+
 export function execGit(
   args: string[],
   cwd: string

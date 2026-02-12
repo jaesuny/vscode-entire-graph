@@ -1,11 +1,13 @@
 import * as fs from "fs";
 import * as path from "path";
-import { gitLog, gitShow, gitLsTree } from "./gitReader";
+import { execCmd, execGit, gitLog, gitShow, gitLsTree } from "./gitReader";
 import type {
   GitCommit,
   ActiveSession,
   CommitDetail,
   EntireCheckpoint,
+  EntireRepoInfo,
+  EntireStatus,
   RootCheckpointMetadata,
   SessionGroup,
   SessionMetadata,
@@ -16,6 +18,57 @@ const ORPHAN_REF = "entire/checkpoints/v1";
 
 export class DataProvider {
   constructor(private cwd: string) {}
+
+  /** Check if the entire CLI is installed. */
+  async isCliInstalled(): Promise<boolean> {
+    try {
+      await execCmd("entire", ["--version"], this.cwd);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /** Check if the repo has Entire enabled. */
+  isRepoEnabled(): boolean {
+    return fs.existsSync(path.join(this.cwd, ".entire", "settings.json"));
+  }
+
+  /** Check if the orphan branch exists. */
+  async hasCheckpointBranch(): Promise<boolean> {
+    try {
+      await execGit(["rev-parse", "--verify", ORPHAN_REF], this.cwd);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /** Determine the overall Entire status for this repo. */
+  async getStatus(): Promise<EntireStatus> {
+    if (!this.isRepoEnabled()) {
+      return { state: "not-enabled" };
+    }
+    if (!(await this.hasCheckpointBranch())) {
+      return { state: "no-checkpoints" };
+    }
+    return { state: "ready" };
+  }
+
+  /** Read repo-level Entire info from settings. */
+  getRepoInfo(): EntireRepoInfo | undefined {
+    try {
+      const settingsPath = path.join(this.cwd, ".entire", "settings.json");
+      const raw = fs.readFileSync(settingsPath, "utf-8");
+      const data = JSON.parse(raw);
+      return {
+        strategy: data.strategy ?? "unknown",
+        cliVersion: data.cli_version ?? "unknown",
+      };
+    } catch {
+      return undefined;
+    }
+  }
 
   /** Parse git log output into structured commits. */
   async getCommits(maxCount = 200): Promise<GitCommit[]> {

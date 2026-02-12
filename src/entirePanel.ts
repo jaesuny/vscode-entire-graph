@@ -70,11 +70,31 @@ export class EntirePanel {
 
   private async loadInitialData() {
     try {
+      const status = await this.dataProvider.getStatus();
+      const repoInfo = this.dataProvider.getRepoInfo();
+
+      if (status.state !== "ready") {
+        this.postMessage({
+          type: "initialData",
+          status,
+          sessions: [],
+          activeSessions: [],
+          repoInfo,
+        });
+        return;
+      }
+
       const [sessions, activeSessions] = await Promise.all([
         this.dataProvider.getSessions(),
         this.dataProvider.getActiveSessions(),
       ]);
-      this.postMessage({ type: "initialData", sessions, activeSessions });
+      this.postMessage({
+        type: "initialData",
+        status,
+        sessions,
+        activeSessions,
+        repoInfo,
+      });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       this.postMessage({ type: "error", message });

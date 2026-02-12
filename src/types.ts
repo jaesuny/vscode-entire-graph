@@ -118,6 +118,19 @@ export interface CommitDetail {
   checkpoint?: EntireCheckpoint;
 }
 
+// ── Environment Status ──
+
+export type EntireStatus =
+  | { state: "ready" }
+  | { state: "cli-not-found" }
+  | { state: "not-enabled" }
+  | { state: "no-checkpoints" };
+
+export interface EntireRepoInfo {
+  strategy: string;
+  cliVersion: string;
+}
+
 // ── Message Protocol (webview ↔ host) ──
 
 export type WebviewMessage =
@@ -125,7 +138,13 @@ export type WebviewMessage =
   | { type: "refresh" };
 
 export type HostMessage =
-  | { type: "initialData"; sessions: SessionGroup[]; activeSessions: ActiveSession[] }
+  | {
+      type: "initialData";
+      status: EntireStatus;
+      sessions: SessionGroup[];
+      activeSessions: ActiveSession[];
+      repoInfo?: EntireRepoInfo;
+    }
   | { type: "checkpointDetail"; detail: CommitDetail }
   | { type: "activeSessions"; sessions: ActiveSession[] }
   | { type: "error"; message: string };
